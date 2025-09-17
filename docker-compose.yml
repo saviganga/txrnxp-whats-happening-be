@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  web:
+    environment:
+    
+      - ENVIRONMENT=${ENVIRONMENT}
+      - DB_USER_LOCAL=${DB_USER_LOCAL}
+      - DB_PASSWORD_LOCAL=${DB_PASSWORD_LOCAL}
+      - DB_ROOT_PASSWORD_LOCAL=${DB_ROOT_PASSWORD_LOCAL}
+      - DB_NAME_LOCAL=${DB_NAME_LOCAL}
+      - VERSION=${VERSION}
+    container_name: txrnup-whats-happening
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/usr/src/app
+       - ./.env:/usr/src/app/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env 
+  
+  db:
+    image: postgres:16-alpine 
+    environment:
+      - POSTGRES_USER=${DB_USER_LOCAL}
+      - POSTGRES_PASSWORD=${DB_PASSWORD_LOCAL}
+      - POSTGRES_DB=${DB_NAME_LOCAL}
+    ports:
+        - "5436:5436"
+    volumes:
+      - postgres-db-11:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER_LOCAL}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-db-11:
