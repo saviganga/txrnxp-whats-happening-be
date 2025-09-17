@@ -20,7 +20,7 @@ type Database struct {
 func NewDatabase(env *Config) (*Database, error) {
 
 	// appEnv := strings.ToLower(os.Getenv("ENVIRONMENT"))
-	appEnv := "local"
+	appEnv := "staging"
 
 	var dsn string
 	fmt.Println(appEnv)
