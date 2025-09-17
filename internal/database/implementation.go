@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"time"
 	"txrnxp-whats-happening/api/v1/dto"
 	"txrnxp-whats-happening/internal/database/tables"
 
@@ -19,14 +20,14 @@ func NewGormRepository(db *gorm.DB) Repository {
 func (r *GormRepository) CreateEvent(event dto.EventRequest) (tables.WhatsHappening, error) {
 
 	whatsHappening := tables.WhatsHappening{
-		Name: event.Name,
-		Address: event.Address,
+		Name:        event.Name,
+		Address:     event.Address,
 		Description: event.Description,
-		StartTime: event.StartTime,
-		EndTime: event.EndTime,
-		Category: event.Category,
-		EventType: event.EventType,
-		Country: event.Country,
+		StartTime:   event.StartTime,
+		EndTime:     event.EndTime,
+		Category:    event.Category,
+		EventType:   event.EventType,
+		Country:     event.Country,
 	}
 
 	err := r.db.Create(&whatsHappening).Error
@@ -38,7 +39,6 @@ func (r *GormRepository) CreateEvent(event dto.EventRequest) (tables.WhatsHappen
 
 }
 
-
 func (r *GormRepository) GetEvents() (events []tables.WhatsHappening, err error) {
 
 	err = r.db.Model(&tables.WhatsHappening{}).Find(&events).Error
@@ -49,6 +49,7 @@ func (r *GormRepository) GetEvents() (events []tables.WhatsHappening, err error)
 	return events, nil
 
 }
+
 func (r *GormRepository) GetWhatsHappeningEvents(page int) (PaginatedResponse, error) {
 	const pageSize = 10
 	var events []tables.WhatsHappening
@@ -59,13 +60,20 @@ func (r *GormRepository) GetWhatsHappeningEvents(page int) (PaginatedResponse, e
 		page = 1
 	}
 
-	// Count total rows
-	if err := r.db.Model(&tables.WhatsHappening{}).Count(&totalCount).Error; err != nil {
+	// Get today's midnight (local time)
+	today := time.Now().Truncate(24 * time.Hour)
+
+	// Count total rows starting from today
+	if err := r.db.Model(&tables.WhatsHappening{}).
+		Where("start_time >= ?", today).
+		Count(&totalCount).Error; err != nil {
 		return PaginatedResponse{}, fmt.Errorf("unable to count events: %w", err)
 	}
 
-	// Fetch page data
+	// Fetch paginated events starting from today
 	if err := r.db.Model(&tables.WhatsHappening{}).
+		Where("start_time >= ?", today).
+		Order("start_time ASC").
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).
 		Find(&events).Error; err != nil {
