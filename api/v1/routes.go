@@ -33,6 +33,10 @@ func Routes(router chi.Router, bundle service.Bundle) {
 			handlers.CreateEvents(w, req, *bundle.WhatsHappeningService)
 		})
 
+		r.Post("/{event-id}/upload-image", func(w http.ResponseWriter, req *http.Request) {
+			handlers.UploadEventImage(w, req, *bundle.WhatsHappeningService)
+		})
+
 		// GET /api/{version}/events/health
 		r.Get("/health", func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)

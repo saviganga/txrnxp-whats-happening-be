@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -9,6 +10,8 @@ import (
 	// service "txrnxp-whats-happening/internal/services/events"
 	"txrnxp-whats-happening/api/v1/dto"
 	services "txrnxp-whats-happening/internal/services/events"
+
+	"github.com/go-chi/chi/v5"
 )
 
 // GetEvents handles GET requests to fetch events.
@@ -68,4 +71,31 @@ func CreateEvents(w http.ResponseWriter, r *http.Request, whatsHappening service
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(event)
+}
+
+// CreateEvents handles POST requests to create a new event.
+func UploadEventImage(w http.ResponseWriter, r *http.Request, whatsHappening services.WhatsHappeningService) {
+
+	id := chi.URLParam(r, "event-id")
+	if id == "" {
+		http.Error(w, "Missing event ID in URL", http.StatusBadRequest)
+		return
+	}
+
+
+	var input dto.UploadImageRequest
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	err := whatsHappening.UploadEventImage(id, input)
+	if err != nil {
+		http.Error(w, "Failed to upload event image", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(nil)
 }

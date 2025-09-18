@@ -90,3 +90,27 @@ func (r *GormRepository) GetWhatsHappeningEvents(page int) (PaginatedResponse, e
 		Data:       events,
 	}, nil
 }
+
+func (r *GormRepository) GetWhatsHappeningEvent(eventID string) (tables.WhatsHappening, error) {
+
+	var event tables.WhatsHappening
+
+	err := r.db.Model(&tables.WhatsHappening{}).
+		Where("id = ?", eventID).
+		First(&event).Error
+		if err != nil {
+			return event, fmt.Errorf("unable to fetch events: %w", err)
+		}
+		
+	return event, nil
+
+}
+
+func (r *GormRepository) UploadEventImage(event tables.WhatsHappening, imageURL string) (error) {
+	err := r.db.Debug().Model(&tables.WhatsHappening{}).Where("id = ?", event.ID).Update("image", imageURL).Error
+	if err != nil {
+		return fmt.Errorf("failed to update event image: %w", err)
+	}
+
+	return nil
+}
