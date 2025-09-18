@@ -3,7 +3,6 @@ package service
 import (
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"strings"
 	"txrnxp-whats-happening/api/v1/dto"
 	configs "txrnxp-whats-happening/config"

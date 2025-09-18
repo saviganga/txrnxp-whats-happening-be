@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -81,7 +80,6 @@ func UploadEventImage(w http.ResponseWriter, r *http.Request, whatsHappening ser
 		http.Error(w, "Missing event ID in URL", http.StatusBadRequest)
 		return
 	}
-
 
 	var input dto.UploadImageRequest
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
