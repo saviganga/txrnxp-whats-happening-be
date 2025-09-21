@@ -15,7 +15,7 @@ type PaginatedResponse struct {
 
 type Repository interface {
 	CreateEvent(event dto.EventRequest) (tables.WhatsHappening, error)
-	GetWhatsHappeningEvents(page int) (PaginatedResponse, error)
+	GetWhatsHappeningEvents(page int, filters map[string]string) (PaginatedResponse, error)
 	GetWhatsHappeningEvent(eventID string) (tables.WhatsHappening, error)
 	UploadEventImage(event tables.WhatsHappening, iageURL string) error
 }

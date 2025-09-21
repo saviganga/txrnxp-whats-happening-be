@@ -29,20 +29,58 @@ func NewWhatsHappeningService(
 	}
 }
 
-func (s *WhatsHappeningService) GetEvents(page int) (database.PaginatedResponse, error) {
+// func (s *WhatsHappeningService) GetEvents(page int, filters map[string]string) (database.PaginatedResponse, error) {
 
-	events, err := s.repo.GetWhatsHappeningEvents(page)
+// 	events, err := s.repo.GetWhatsHappeningEvents(page)
+// 	if err != nil {
+// 		return events, errors.New("unable to fetch what's happening events")
+// 	}
+// 	eventss := []tables.WhatsHappening{}
+// 	for _, event := range events.Data {
+
+// 		var eventImage string
+// 		if event.Image != "" {
+// 			eventImage = s.mediaService.GetMediaURL(event.Image)
+// 		} else {
+// 			eventImage = eventImage
+// 		}
+
+// 		eventt := tables.WhatsHappening{
+// 			ID:          event.ID,
+// 			Name:        event.Name,
+// 			Image:       eventImage,
+// 			EventType:   event.EventType,
+// 			Country:     event.Country,
+// 			Description: event.Description,
+// 			Address:     event.Address,
+// 			Category:    event.Category,
+// 			Duration:    event.Duration,
+// 			StartTime:   event.StartTime,
+// 			EndTime:     event.EndTime,
+// 			CreatedAt:   event.CreatedAt,
+// 			UpdatedAt:   event.UpdatedAt,
+// 		}
+// 		eventss = append(eventss, eventt)
+
+// 	}
+// 	events.Data = eventss
+// 	return events, nil
+
+// }
+
+func (s *WhatsHappeningService) GetEvents(page int, filters map[string]string) (database.PaginatedResponse, error) {
+	// pass filters down to repo
+	events, err := s.repo.GetWhatsHappeningEvents(page, filters)
 	if err != nil {
 		return events, errors.New("unable to fetch what's happening events")
 	}
-	eventss := []tables.WhatsHappening{}
-	for _, event := range events.Data {
 
-		var eventImage string
+	// transform events
+	eventss := make([]tables.WhatsHappening, 0, len(events.Data))
+	for _, event := range events.Data {
+		eventImage := ""
 		if event.Image != "" {
 			eventImage = s.mediaService.GetMediaURL(event.Image)
-		} else {
-			eventImage = eventImage
 		}
 
 		eventt := tables.WhatsHappening{
@@ -61,12 +99,12 @@ func (s *WhatsHappeningService) GetEvents(page int) (database.PaginatedResponse,
 			UpdatedAt:   event.UpdatedAt,
 		}
 		eventss = append(eventss, eventt)
-
 	}
+
 	events.Data = eventss
 	return events, nil
-
 }
+
 
 func (s *WhatsHappeningService) CreateEvents(input dto.EventRequest) (tables.WhatsHappening, error) {
 

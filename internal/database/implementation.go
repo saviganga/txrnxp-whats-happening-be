@@ -50,7 +50,48 @@ func (r *GormRepository) GetEvents() (events []tables.WhatsHappening, err error)
 
 }
 
-func (r *GormRepository) GetWhatsHappeningEvents(page int) (PaginatedResponse, error) {
+// func (r *GormRepository) GetWhatsHappeningEvents(page int) (PaginatedResponse, error) {
+// 	const pageSize = 10
+// 	var events []tables.WhatsHappening
+// 	var totalCount int64
+
+// 	// Ensure page starts at 1
+// 	if page < 1 {
+// 		page = 1
+// 	}
+
+// 	// Get today's midnight (local time)
+// 	today := time.Now().Truncate(24 * time.Hour)
+
+// 	// Count total rows starting from today
+// 	if err := r.db.Model(&tables.WhatsHappening{}).
+// 		Where("start_time >= ?", today).
+// 		Count(&totalCount).Error; err != nil {
+// 		return PaginatedResponse{}, fmt.Errorf("unable to count events: %w", err)
+// 	}
+
+// 	// Fetch paginated events starting from today
+// 	if err := r.db.Model(&tables.WhatsHappening{}).
+// 		Where("start_time >= ?", today).
+// 		Order("start_time ASC").
+// 		Limit(pageSize).
+// 		Offset((page - 1) * pageSize).
+// 		Find(&events).Error; err != nil {
+// 		return PaginatedResponse{}, fmt.Errorf("unable to fetch events: %w", err)
+// 	}
+
+// 	totalPages := int((totalCount + int64(pageSize) - 1) / int64(pageSize)) // ceil division
+
+// 	return PaginatedResponse{
+// 		Page:       page,
+// 		PageSize:   pageSize,
+// 		TotalCount: totalCount,
+// 		TotalPages: totalPages,
+// 		Data:       events,
+// 	}, nil
+// }
+
+func (r *GormRepository) GetWhatsHappeningEvents(page int, filters map[string]string) (PaginatedResponse, error) {
 	const pageSize = 10
 	var events []tables.WhatsHappening
 	var totalCount int64
@@ -63,17 +104,36 @@ func (r *GormRepository) GetWhatsHappeningEvents(page int) (PaginatedResponse, e
 	// Get today's midnight (local time)
 	today := time.Now().Truncate(24 * time.Hour)
 
-	// Count total rows starting from today
-	if err := r.db.Model(&tables.WhatsHappening{}).
-		Where("start_time >= ?", today).
-		Count(&totalCount).Error; err != nil {
+	// Base query: events starting from today
+	query := r.db.Model(&tables.WhatsHappening{}).Where("start_time >= ?", today)
+
+	// Apply filters dynamically
+	for key, value := range filters {
+		switch key {
+		case "name":
+			query = query.Where("name ILIKE ?", "%"+value+"%")
+		case "address":
+			query = query.Where("address ILIKE ?", "%"+value+"%")
+		case "category":
+			query = query.Where("category = ?", value)
+		case "start_time":
+			if t, err := time.Parse(time.RFC3339, value); err == nil {
+				query = query.Where("start_time >= ?", t)
+			}
+		case "end_time":
+			if t, err := time.Parse(time.RFC3339, value); err == nil {
+				query = query.Where("end_time <= ?", t)
+			}
+		}
+	}
+
+	// Count total rows
+	if err := query.Count(&totalCount).Error; err != nil {
 		return PaginatedResponse{}, fmt.Errorf("unable to count events: %w", err)
 	}
 
-	// Fetch paginated events starting from today
-	if err := r.db.Model(&tables.WhatsHappening{}).
-		Where("start_time >= ?", today).
-		Order("start_time ASC").
+	// Fetch paginated events
+	if err := query.Order("start_time ASC").
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).
 		Find(&events).Error; err != nil {
@@ -98,15 +158,15 @@ func (r *GormRepository) GetWhatsHappeningEvent(eventID string) (tables.WhatsHap
 	err := r.db.Model(&tables.WhatsHappening{}).
 		Where("id = ?", eventID).
 		First(&event).Error
-		if err != nil {
-			return event, fmt.Errorf("unable to fetch events: %w", err)
-		}
-		
+	if err != nil {
+		return event, fmt.Errorf("unable to fetch events: %w", err)
+	}
+
 	return event, nil
 
 }
 
-func (r *GormRepository) UploadEventImage(event tables.WhatsHappening, imageURL string) (error) {
+func (r *GormRepository) UploadEventImage(event tables.WhatsHappening, imageURL string) error {
 	err := r.db.Debug().Model(&tables.WhatsHappening{}).Where("id = ?", event.ID).Update("image", imageURL).Error
 	if err != nil {
 		return fmt.Errorf("failed to update event image: %w", err)

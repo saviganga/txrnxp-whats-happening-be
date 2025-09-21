@@ -28,28 +28,73 @@ import (
 // }
 
 // GetWhatsHappeningEvents handles GET requests to fetch "whats happening" events.
+// func GetWhatsHappeningEvents(w http.ResponseWriter, r *http.Request, whatsHappening services.WhatsHappeningService) {
+// 	log.Println("Received GET /events/whats-happening request")
+
+// 	// Get ?page query param (default = 1)
+// 	pageStr := r.URL.Query().Get("page")
+// 	page, err := strconv.Atoi(pageStr)
+// 	if err != nil || page < 1 {
+// 		page = 1
+// 	}
+
+// 	// Fetch events with pagination
+// 	events, err := whatsHappening.GetEvents(page)
+// 	if err != nil {
+// 		http.Error(w, "Failed to fetch events", http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	w.Header().Set("Content-Type", "application/json")
+// 	if err := json.NewEncoder(w).Encode(events); err != nil {
+// 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+// 	}
+// }
+
 func GetWhatsHappeningEvents(w http.ResponseWriter, r *http.Request, whatsHappening services.WhatsHappeningService) {
 	log.Println("Received GET /events/whats-happening request")
 
-	// Get ?page query param (default = 1)
+	// --- Pagination ---
 	pageStr := r.URL.Query().Get("page")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
 		page = 1
 	}
 
-	// Fetch events with pagination
-	events, err := whatsHappening.GetEvents(page)
+	// --- Allowed filters ---
+	allowedFilters := map[string]bool{
+		"name":       true,
+		"address":    true,
+		"category":   true,
+		"start_time": true,
+		"end_time":   true,
+	}
+
+	// --- Collect filters ---
+	filters := make(map[string]string)
+	for key, values := range r.URL.Query() {
+		if allowedFilters[key] {
+			// take the first value if multiple
+			if len(values) > 0 {
+				filters[key] = values[0]
+			}
+		}
+	}
+
+	// --- Fetch events ---
+	events, err := whatsHappening.GetEvents(page, filters) // you'll need to update service signature
 	if err != nil {
 		http.Error(w, "Failed to fetch events", http.StatusInternalServerError)
 		return
 	}
 
+	// --- Response ---
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(events); err != nil {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
 }
+
 
 // CreateEvents handles POST requests to create a new event.
 func CreateEvents(w http.ResponseWriter, r *http.Request, whatsHappening services.WhatsHappeningService) {
