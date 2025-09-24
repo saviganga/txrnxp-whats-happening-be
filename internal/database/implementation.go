@@ -5,6 +5,7 @@ import (
 	"time"
 	"txrnxp-whats-happening/api/v1/dto"
 	"txrnxp-whats-happening/internal/database/tables"
+	"github.com/google/uuid"
 
 	"gorm.io/gorm"
 )
@@ -19,7 +20,9 @@ func NewGormRepository(db *gorm.DB) Repository {
 
 func (r *GormRepository) CreateEvent(event dto.EventRequest) (tables.WhatsHappening, error) {
 
+	id, _ := uuid.Parse(event.ID)
 	whatsHappening := tables.WhatsHappening{
+		ID:          id,
 		Name:        event.Name,
 		Address:     event.Address,
 		Description: event.Description,

@@ -8,6 +8,7 @@ import (
 
 // EventRequest is used when creating/updating an event
 type EventRequest struct {
+	ID          string    `json:"id"`
 	Name        string    `json:"name"`
 	Image       string    `json:"image"`
 	EventType   string    `json:"event_type"`
