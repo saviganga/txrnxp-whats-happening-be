@@ -26,6 +26,9 @@ type WhatsHappening struct {
 
 // BeforeCreate is a GORM hook that generates a new UUID before creating a record.
 func (event *WhatsHappening) BeforeCreate(tx *gorm.DB) (err error) {
-	event.ID = uuid.New()
+	if event.ID == uuid.Nil {
+		event.ID = uuid.New()
+	}
+
 	return
 }
