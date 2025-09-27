@@ -142,3 +142,22 @@ func UploadEventImage(w http.ResponseWriter, r *http.Request, whatsHappening ser
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(nil)
 }
+
+func GetWhatsHappeningEvent(w http.ResponseWriter, r *http.Request, whatsHappening services.WhatsHappeningService) {
+
+	id := chi.URLParam(r, "event-id")
+	if id == "" {
+		http.Error(w, "Missing event ID in URL", http.StatusBadRequest)
+		return
+	}
+
+	event, err := whatsHappening.GetWhatsHappeningEvent(id)
+	if err != nil {
+		http.Error(w, "Failed to get event", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(event)
+}

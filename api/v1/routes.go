@@ -28,6 +28,11 @@ func Routes(router chi.Router, bundle service.Bundle) {
 			handlers.GetWhatsHappeningEvents(w, req, *bundle.WhatsHappeningService)
 		})
 
+		// GET /api/{version}/events/whats-happening/{event-id}
+		r.Get("/whats-happening/{event-id}", func(w http.ResponseWriter, req *http.Request) {
+			handlers.GetWhatsHappeningEvent(w, req, *bundle.WhatsHappeningService)
+		})
+
 		// POST /api/{version}/events
 		r.Post("/", func(w http.ResponseWriter, req *http.Request) {
 			handlers.CreateEvents(w, req, *bundle.WhatsHappeningService)

@@ -116,6 +116,17 @@ func (s *WhatsHappeningService) CreateEvents(input dto.EventRequest) (tables.Wha
 
 }
 
+
+func (s *WhatsHappeningService) GetWhatsHappeningEvent(id string) (tables.WhatsHappening, error) {
+
+	event, err := s.repo.GetWhatsHappeningEvent(id)
+	if err != nil {
+		return event, errors.New("unable to fetch event")
+	}
+	return event, nil
+
+}
+
 func (s *WhatsHappeningService) UploadEventImage(eventID string, input dto.UploadImageRequest) error {
 
 	// validate the base64 encoding
