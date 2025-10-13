@@ -16,7 +16,7 @@ type WhatsHappening struct {
 	Country     string    `gorm:"type:varchar(50);default:'NGA'" json:"country"`
 	Description string    `gorm:"type:varchar(50)" json:"description"`
 	Address     string    `gorm:"type:text" json:"address"`
-	Category    string    `gorm:"type:varchar(50)" json:"category"`
+	Category    string    `gorm:"type:varchar(150)" json:"category"`
 	Duration    string    `gorm:"type:varchar(50)" json:"duration"`
 	StartTime   time.Time `gorm:"type:timestamp with time zone;not null" json:"start_time"`
 	EndTime     time.Time `gorm:"type:timestamp with time zone;not null" json:"end_time"`
