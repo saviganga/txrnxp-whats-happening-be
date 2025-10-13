@@ -31,7 +31,7 @@ func (event *WhatsHappening) BeforeCreate(tx *gorm.DB) (err error) {
 	}
 
 	if event.Category == "" {
-		event.Category = "PARTY"
+		event.Category = "ART & CULTURE"
 	}
 
 	return
