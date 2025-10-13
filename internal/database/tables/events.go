@@ -30,5 +30,9 @@ func (event *WhatsHappening) BeforeCreate(tx *gorm.DB) (err error) {
 		event.ID = uuid.New()
 	}
 
+	if event.Category == "" {
+		event.Category = "PARTY"
+	}
+
 	return
 }
