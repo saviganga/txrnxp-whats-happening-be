@@ -5,6 +5,7 @@ import (
 	"time"
 	"txrnxp-whats-happening/api/v1/dto"
 	"txrnxp-whats-happening/internal/database/tables"
+
 	"github.com/google/uuid"
 
 	"gorm.io/gorm"
@@ -119,7 +120,8 @@ func (r *GormRepository) GetWhatsHappeningEvents(page int, filters map[string]st
 		case "address":
 			query = query.Where("address ILIKE ?", "%"+value+"%")
 		case "category":
-			query = query.Where("category = ?", value)
+			query = query.Where("category ILIKE ?", "%"+value+"%")
+			// query = query.Where("category = ?", value)
 		// case "start_time":
 		// 	if t, err := time.Parse(time.RFC3339, value); err == nil {
 		// 		query = query.Where("start_time >= ?", t)
