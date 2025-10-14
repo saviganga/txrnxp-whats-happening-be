@@ -110,7 +110,7 @@ func (r *GormRepository) GetWhatsHappeningEvents(page int, filters map[string]st
 	today := time.Now().Truncate(24 * time.Hour)
 
 	// Base query: events starting from today
-	query := r.db.Model(&tables.WhatsHappening{}).Where("start_time >= ?", today)
+	query := r.db.Debug().Model(&tables.WhatsHappening{}).Where("start_time >= ?", today)
 
 	// Apply filters dynamically
 	for key, value := range filters {
