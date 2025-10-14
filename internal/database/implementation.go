@@ -116,11 +116,11 @@ func (r *GormRepository) GetWhatsHappeningEvents(page int, filters map[string]st
 	for key, value := range filters {
 		switch key {
 		case "name":
-			query = query.Where("name ILIKE ?", "%"+value+"%")
+			query = query.Where("LOWER(name) LIKE LOWER(?)", "%"+value+"%")
 		case "address":
-			query = query.Where("address ILIKE ?", "%"+value+"%")
+			query = query.Where("LOWER(address) LIKE LOWER(?)", "%"+value+"%")
 		case "category":
-			query = query.Where("category ILIKE ?", "%"+value+"%")
+			query = query.Where("LOWER(category) LIKE LOWER(?)", "%"+value+"%")
 			// query = query.Where("category = ?", value)
 		// case "start_time":
 		// 	if t, err := time.Parse(time.RFC3339, value); err == nil {

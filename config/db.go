@@ -24,7 +24,8 @@ func NewDatabase(env *Config) (*Database, error) {
 	appEnv := env.Environment
 
 	var dsn string
-	if appEnv == "local" {
+	switch appEnv {
+	case "local":
 		dsn = fmt.Sprintf(
 			"host=db user=%s password=%s dbname=%s port=5432 sslmode=disable",
 			// os.Getenv("DB_HOST"),
@@ -35,13 +36,13 @@ func NewDatabase(env *Config) (*Database, error) {
 			// os.Getenv(fmt.Sprintf("DB_PASSWORD_%s", os.Getenv("ENVIRONMENT"))),
 			// os.Getenv(fmt.Sprintf("DB_NAME_%s", os.Getenv("ENVIRONMENT"))),
 		)
-	} else if appEnv == "staging" {
+	case "staging":
 		dsn = os.Getenv("DATABASE_URL")
 		if dsn == "" {
 			log.Fatal("DATABASE_URL is not set")
 			os.Exit(2)
 		}
-	} else {
+	default:
 		dsn = os.Getenv("DATABASE_URL_PROD")
 		if dsn == "" {
 			log.Fatal("DATABASE_URL is not set")
