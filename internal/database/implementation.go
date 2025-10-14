@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"strings"
 	"time"
 	"txrnxp-whats-happening/api/v1/dto"
 	"txrnxp-whats-happening/internal/database/tables"
@@ -116,11 +117,11 @@ func (r *GormRepository) GetWhatsHappeningEvents(page int, filters map[string]st
 	for key, value := range filters {
 		switch key {
 		case "name":
-			query = query.Where("LOWER(name) LIKE LOWER(?)", "%"+value+"%")
+			query = query.Where("LOWER(name) LIKE LOWER(?)", "%"+strings.ToLower(value)+"%")
 		case "address":
-			query = query.Where("LOWER(address) LIKE LOWER(?)", "%"+value+"%")
+			query = query.Where("LOWER(address) LIKE LOWER(?)", "%"+strings.ToLower(value)+"%")
 		case "category":
-			query = query.Where("LOWER(category) LIKE LOWER(?)", "%"+value+"%")
+			query = query.Where("LOWER(category) LIKE LOWER(?)", "%"+strings.ToLower(value)+"%")
 			// query = query.Where("category = ?", value)
 		// case "start_time":
 		// 	if t, err := time.Parse(time.RFC3339, value); err == nil {
