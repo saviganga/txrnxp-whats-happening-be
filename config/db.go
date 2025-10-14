@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+
 	// "strings"
 	"time"
 	"txrnxp-whats-happening/internal/database/tables"
@@ -20,10 +21,9 @@ type Database struct {
 func NewDatabase(env *Config) (*Database, error) {
 
 	// appEnv := strings.ToLower(os.Getenv("ENVIRONMENT"))
-	appEnv := "staging"
+	appEnv := env.Environment
 
 	var dsn string
-	fmt.Println(appEnv)
 	if appEnv == "local" {
 		dsn = fmt.Sprintf(
 			"host=db user=%s password=%s dbname=%s port=5432 sslmode=disable",
@@ -36,8 +36,14 @@ func NewDatabase(env *Config) (*Database, error) {
 			// os.Getenv(fmt.Sprintf("DB_NAME_%s", os.Getenv("ENVIRONMENT"))),
 			// os.Getenv("DB_PORT"), // Assuming DB_PORT is also set for local
 		)
-	} else {
+	} else if appEnv == "staging" {
 		dsn = os.Getenv("DATABASE_URL")
+		if dsn == "" {
+			log.Fatal("DATABASE_URL is not set")
+			os.Exit(2)
+		}
+	} else {
+		dsn = os.Getenv("DATABASE_URL_PROD")
 		if dsn == "" {
 			log.Fatal("DATABASE_URL is not set")
 			os.Exit(2)
