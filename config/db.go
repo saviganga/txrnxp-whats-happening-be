@@ -34,7 +34,6 @@ func NewDatabase(env *Config) (*Database, error) {
 			// os.Getenv(fmt.Sprintf("DB_USER_%s", os.Getenv("ENVIRONMENT"))),
 			// os.Getenv(fmt.Sprintf("DB_PASSWORD_%s", os.Getenv("ENVIRONMENT"))),
 			// os.Getenv(fmt.Sprintf("DB_NAME_%s", os.Getenv("ENVIRONMENT"))),
-			// os.Getenv("DB_PORT"), // Assuming DB_PORT is also set for local
 		)
 	} else if appEnv == "staging" {
 		dsn = os.Getenv("DATABASE_URL")
