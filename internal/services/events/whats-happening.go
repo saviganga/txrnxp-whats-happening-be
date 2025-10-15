@@ -112,6 +112,50 @@ func (s *WhatsHappeningService) CreateEvents(input dto.EventRequest) (tables.Wha
 	if err != nil {
 		return event, errors.New("unable to create what's happening events")
 	}
+
+	if input.Image != "" {
+		// validate the base64 encoding
+		if !strings.Contains(input.Image, "data:image") {
+			return tables.WhatsHappening{}, errors.New("invalid image format")
+		}
+
+		// get image data from base 64 string
+		parts := strings.Split(input.Image, ",")
+		if len(parts) < 2 {
+			return tables.WhatsHappening{}, errors.New("invalid image data")
+		}
+
+		// decode base 64 image
+		imageData, err := base64.StdEncoding.DecodeString(parts[1])
+		if err != nil {
+			return tables.WhatsHappening{}, errors.New("unable to decode image")
+		}
+
+		ev, err := s.repo.GetWhatsHappeningEvent(event.ID.String())
+		if err != nil {
+			return ev, errors.New("unable to fetch event")
+		}
+
+		// name the file
+		fileName := event.ID.String() + ".png"
+
+		imageURL, err := s.mediaService.UploadMedia(fileName, imageData)
+		if err != nil {
+			return ev, errors.New("unable to upload image")
+		}
+
+		// upload user image
+		err = s.repo.UploadEventImage(event, imageURL)
+		if err != nil {
+			return ev, errors.New("unable to save image")
+		}
+
+		return ev, nil
+	}
+
+
+
+
 	return event, nil
 
 }
