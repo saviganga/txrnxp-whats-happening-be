@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"strings"
 	"txrnxp-whats-happening/api/v1/dto"
 	configs "txrnxp-whats-happening/config"
@@ -114,25 +115,32 @@ func (s *WhatsHappeningService) CreateEvents(input dto.EventRequest) (tables.Wha
 	}
 
 	if input.Image != "" {
+		fmt.Println("handle image")
 		// validate the base64 encoding
 		if !strings.Contains(input.Image, "data:image") {
+			fmt.Println(1)
 			return tables.WhatsHappening{}, errors.New("invalid image format")
 		}
 
 		// get image data from base 64 string
 		parts := strings.Split(input.Image, ",")
 		if len(parts) < 2 {
+			fmt.Println(2)
 			return tables.WhatsHappening{}, errors.New("invalid image data")
 		}
 
 		// decode base 64 image
 		imageData, err := base64.StdEncoding.DecodeString(parts[1])
 		if err != nil {
+			fmt.Println(3)
+			fmt.Println(err)
 			return tables.WhatsHappening{}, errors.New("unable to decode image")
 		}
 
 		ev, err := s.repo.GetWhatsHappeningEvent(event.ID.String())
 		if err != nil {
+			fmt.Println(4)
+			fmt.Println(err)
 			return ev, errors.New("unable to fetch event")
 		}
 
@@ -141,12 +149,16 @@ func (s *WhatsHappeningService) CreateEvents(input dto.EventRequest) (tables.Wha
 
 		imageURL, err := s.mediaService.UploadMedia(fileName, imageData)
 		if err != nil {
+			fmt.Println(5)
+			fmt.Println(err)
 			return ev, errors.New("unable to upload image")
 		}
 
 		// upload user image
 		err = s.repo.UploadEventImage(event, imageURL)
 		if err != nil {
+			fmt.Println(6)
+			fmt.Println(err)
 			return ev, errors.New("unable to save image")
 		}
 
